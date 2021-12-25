@@ -1,0 +1,4 @@
+tr.active-bus-line > td,
+tr.active-message-line > td {
+    background-color: aqua;
+}
