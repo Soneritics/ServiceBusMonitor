@@ -5,7 +5,16 @@ VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceBusMonitor", "ServiceBusMonitor\ServiceBusMonitor.csproj", "{5D132465-1708-4C60-A702-69AF256D534C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusMonitor.Api", "ServiceBusMonitor.Api\ServiceBusMonitor.Api.csproj", "{DF9EA132-DB14-4299-9660-93AA71613013}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceBusMonitor.Api", "ServiceBusMonitor.Api\ServiceBusMonitor.Api.csproj", "{DF9EA132-DB14-4299-9660-93AA71613013}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{BCB64F47-AB21-44C4-BDC5-7304D98CC5F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{3F78A24E-D63C-4DB4-B4F0-989FC2C0AC7D}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +33,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5D132465-1708-4C60-A702-69AF256D534C} = {BCB64F47-AB21-44C4-BDC5-7304D98CC5F7}
+		{DF9EA132-DB14-4299-9660-93AA71613013} = {BCB64F47-AB21-44C4-BDC5-7304D98CC5F7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D894B059-3DC1-4F94-A568-281363D454F3}
