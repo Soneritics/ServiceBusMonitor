@@ -122,6 +122,22 @@
 
                 td = $('<td></td>');
                 td.text(message.content);
+
+                var lineActions = $('<div></div>');
+
+                var downloadAction = $('<a href="javascript:;">Download</a>');
+                downloadAction.on('click', function() {
+                    var blob = new Blob([message.content], { type: "text/plain;charset=utf-8" });
+                    saveAs(blob, "msg-" + message.id + ".json");
+
+                    return false;
+                });
+                lineActions.append(downloadAction);
+
+
+                lineActions.append(lineActions);
+                td.append(lineActions);
+
                 tr.append(td);
 
                 table.find('tbody').append(tr);
