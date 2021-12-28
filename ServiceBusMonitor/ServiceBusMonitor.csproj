@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Folder Include="Areas\Api\Models\" />
+    <Folder Include="wwwroot\lib\" />
   </ItemGroup>
 
   <ItemGroup>
