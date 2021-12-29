@@ -1,36 +1,49 @@
-﻿@{
+﻿@using ServiceBusMonitor.Areas.Api.Models
+@{
     ViewData["Title"] = "Loading the Service Bus Monitor";
 }
 
 <div class="text-center">
     <h1 class="display-4">Loading the Service Bus Monitor..</h1>
-    <p id="status-message">Warming up..</p>
+    <p id="status-message">Warming up</p>
 </div>
 
 <script>
-    var serviceBusLoaded = false;
+    var checkStatus = function() {
+        $.get("/api/ApplicationLoader/Status", function(data) {
+            processStatus(data);
+        });
+    };
+
+    var processStatus = function(data) {
+        var targetHolder = $('#status-message');
+        if (targetHolder.text() !== data.status) {
+            targetHolder.fadeOut(250, function() {
+                targetHolder.removeClass('text-warning');
+                targetHolder.removeClass('text-danger');
+                targetHolder.text(data.status);
+                targetHolder.fadeIn(250);
+            });
+        }
+
+        if (data.redirectUri !== "") {
+            document.location = data.redirectUri;
+        } else if (data.loaderStatusType === @((int)LoaderStatusType.Warning)) {
+            targetHolder.addClass('text-warning');
+        } else if (data.loaderStatusType === @((int)LoaderStatusType.Error)) {
+            targetHolder.addClass('text-danger');
+        } else {
+            setTimeout(function() {
+                checkStatus();
+            }, 500);
+        }
+    };
 
     windowload.push(function() {
         $.get("/api/ApplicationLoader", function(data) {
-            serviceBusLoaded = true;
-            $("#status-message").text(data);
-
-            setTimeout(function() {
-                document.location = '/Monitor';
-            }, 2000);
+            processStatus(data);
         });
 
-        var checkStatus = function() {
-            setTimeout(function() {
-                $.get("/api/ApplicationLoader/Status", function(data) {
-                    $("#status-message").text(data);
-                });
-
-                if (!serviceBusLoaded) {
-                    checkStatus();
-                }
-            }, 100);
-        };
         checkStatus();
     });
 </script>
