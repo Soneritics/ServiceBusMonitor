@@ -19,6 +19,10 @@ function build(cb) {
 
     src(nodeRoot + "/file-saver/dist/FileSaver.min.js").pipe(dest(targetPath + "/file-saver"));
 
+    src(nodeRoot + "/@fortawesome/fontawesome-free/js/*").pipe(dest(targetPath + "/fontawesome/js"));
+    src(nodeRoot + "/@fortawesome/fontawesome-free/css/*").pipe(dest(targetPath + "/fontawesome/css"));
+    src(nodeRoot + "/@fortawesome/fontawesome-free/webfonts/*").pipe(dest(targetPath + "/fontawesome/webfonts"));
+
     cb();
 }
 
