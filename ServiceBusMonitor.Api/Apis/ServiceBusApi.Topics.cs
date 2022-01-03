@@ -28,7 +28,10 @@ namespace ServiceBusMonitor.Api.Apis
                     var subscriptionList = new List<ServiceBusTopicSubscription>();
                     var topic = topics.Current;
 
-                    var subscriptionRuntimeProperties = client.GetSubscriptionsRuntimePropertiesAsync(topic.Name)?.GetAsyncEnumerator();
+                    var subscriptionRuntimeProperties = client
+                        .GetSubscriptionsRuntimePropertiesAsync(topic.Name)?
+                        .GetAsyncEnumerator();
+
                     if (subscriptionRuntimeProperties != default)
                     {
                         while (await subscriptionRuntimeProperties.MoveNextAsync())
@@ -55,15 +58,16 @@ namespace ServiceBusMonitor.Api.Apis
             _topics = updatedTopicList.OrderBy(t => t.Name);
         }
 
-        public async Task<IEnumerable<DlqMessage>> GetDqlMessagesFromTopicSubscriptionAsync(string topicName, string subscriptionName)
+        public async Task<IEnumerable<DlqMessage>> GetDqlMessagesFromTopicSubscriptionAsync(
+            string topicName,
+            string subscriptionName)
         {
             var subPath = EntityNameHelper.FormatSubscriptionPath(topicName, subscriptionName);
             var deadLetterPath = EntityNameHelper.FormatDeadLetterPath(subPath);
 
             var client = new MessageReceiver(
                 _configuration.ConnectionString,
-                deadLetterPath,
-                ReceiveMode.PeekLock);
+                deadLetterPath);
 
             var result = new List<DlqMessage>();
             Message message;
@@ -82,6 +86,32 @@ namespace ServiceBusMonitor.Api.Apis
             } while (message != default);
 
             return result;
+        }
+
+        public async Task RemoveDqlMessagesFromTopicSubscriptionAsync(
+            string topicName,
+            string subscriptionName,
+            string messageId)
+        {
+            var subPath = EntityNameHelper.FormatSubscriptionPath(topicName, subscriptionName);
+            var deadLetterPath = EntityNameHelper.FormatDeadLetterPath(subPath);
+
+            var client = new MessageReceiver(
+                _configuration.ConnectionString,
+                deadLetterPath);
+
+            Message? message;
+            do
+            {
+                message = await client.ReceiveAsync();
+                if (message != default && messageId.Equals(message.MessageId))
+                {
+                    await client.CompleteAsync(message.SystemProperties.LockToken);
+                    message = default;
+                }
+            } while (message != default);
+
+            // todo: throw message not found exception
         }
     }
 }

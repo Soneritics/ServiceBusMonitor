@@ -46,7 +46,6 @@
     <div id="dlq-message-ai-logs"></div>
 </div>
 
-
 <script>
     // Loader image, when applicable
     var loaderHtml = '<i class="fas fa-circle-notch fa-spin"></i>';
@@ -77,7 +76,7 @@
     };
 
     var loadDlqMessages = function() {
-        $('#dlq-messages').html('');
+        $('#dlq-messages').html(loaderHtml);
 
         var element = $('tr[data-hash="' + activeBusColumn + '"]');
         var busType = element.data('bus-type');
@@ -134,6 +133,52 @@
                 });
                 lineActions.append(downloadAction);
 
+                var deleteAction = $('<a href="javascript:;">Delete</a>');
+                deleteAction.on('click', function() {
+                    $(this).off('click');
+                    $(this).html(loaderHtml);
+
+                    var element = $('tr[data-hash="' + activeBusColumn + '"]');
+                    var busType = element.data('bus-type');
+
+                    var apiBaseUri = '';
+                    var data = {};
+
+                    switch (busType) {
+                        case 'queue':
+                            apiBaseUri = '@Url.Action("RemoveDlqMessageFromQueue", "Bus", new { area = "Api" })';
+                            data = {
+                                busName: '@Model.ActiveBus',
+                                queueName: element.data('bus-name'),
+                                messageId: message.id
+                            };
+                            break;
+
+                        case 'topic':
+                            apiBaseUri = '@Url.Action("RemoveDlqMessageFromTopicSubscription", "Bus", new { area = "Api" })';
+                            data = {
+                                busName: '@Model.ActiveBus',
+                                topicName: element.data('bus-name'),
+                                subscriptionName: element.data('bus-subscription'),
+                                messageId: message.id
+                            };
+                            break;
+                    }
+
+                    $.ajax({
+                        type: "POST",
+                        url: apiBaseUri,
+                        data: JSON.stringify(data),
+                        contentType : 'application/json',
+                        success: function() {
+                            loadDlqMessages();
+                        }
+                    });
+
+                    return false;
+                });
+                lineActions.append(deleteAction);
+
 
                 lineActions.append(lineActions);
                 td.append(lineActions);
@@ -145,6 +190,7 @@
         }
 
         var target = $('#dlq-messages');
+        target.html('');
         target.append(table);
         target.find('tbody > tr').on('click', function() {
             target.find('.active-message-line').removeClass('active-message-line');

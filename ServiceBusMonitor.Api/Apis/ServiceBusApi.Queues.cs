@@ -24,7 +24,8 @@ namespace ServiceBusMonitor.Api.Apis
                 while (await queues.MoveNextAsync())
                 {
                     var queue = queues.Current;
-                    var runtimeProperties = await client.GetQueueRuntimePropertiesAsync(queue.Name);
+                    var runtimeProperties = await client
+                        .GetQueueRuntimePropertiesAsync(queue.Name);
 
                     updatedQueueList.Add(new ServiceBusQueue()
                     {
@@ -44,8 +45,7 @@ namespace ServiceBusMonitor.Api.Apis
 
             var client = new MessageReceiver(
                 _configuration.ConnectionString,
-                deadLetterPath,
-                ReceiveMode.PeekLock);
+                deadLetterPath);
 
             var result = new List<DlqMessage>();
             Message message;
@@ -64,6 +64,28 @@ namespace ServiceBusMonitor.Api.Apis
             } while (message != default);
 
             return result;
+        }
+
+        public async Task RemoveDqlMessagesFromQueueAsync(string queueName, string messageId)
+        {
+            var deadLetterPath = EntityNameHelper.FormatDeadLetterPath(queueName);
+
+            var client = new MessageReceiver(
+                _configuration.ConnectionString,
+                deadLetterPath);
+
+            Message? message;
+            do
+            {
+                message = await client.ReceiveAsync();
+                if (message != default && messageId.Equals(message.MessageId))
+                {
+                    await client.CompleteAsync(message.SystemProperties.LockToken);
+                    message = default;
+                }
+            } while (message != default);
+
+            // todo: throw message not found exception
         }
     }
 }

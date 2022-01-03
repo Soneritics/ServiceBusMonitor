@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ServiceBusMonitor.Api;
+using ServiceBusMonitor.Areas.Api.Models;
 
 namespace ServiceBusMonitor.Areas.Api.Controllers;
 
@@ -33,6 +34,49 @@ public class BusController : ApiControllerBase
             .GetDqlMessagesFromQueueAsync(queueName);
 
         return new JsonResult(messages);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RemoveDlqMessageFromQueue(QueueMessageToDelete message)
+    {
+        try
+        {
+            await ApiCollection
+                .GetServiceBusApi(message.BusName)
+                .RemoveDqlMessagesFromQueueAsync(message.QueueName, message.MessageId);
+        }
+        catch (Exception e)
+        {
+            return new JsonResult(e)
+            {
+                StatusCode = 500
+            };
+        }
+
+        return new OkResult();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RemoveDlqMessageFromTopicSubscription(TopicMessageToDelete message)
+    {
+        try
+        {
+            await ApiCollection
+                .GetServiceBusApi(message.BusName)
+                .RemoveDqlMessagesFromTopicSubscriptionAsync(
+                    message.TopicName,
+                    message.SubscriptionName,
+                    message.MessageId);
+        }
+        catch (Exception e)
+        {
+            return new JsonResult(e)
+            {
+                StatusCode = 500
+            };
+        }
+
+        return new OkResult();
     }
 
     [HttpGet]
