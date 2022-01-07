@@ -18,10 +18,7 @@
     /**
      * Initialize the User Interface.
      */
-    init() {
-        // First, register the components and actions that listen to events
-        this.registerComponents();
-
+    init(): void {
         // First, reset the UI
         this.reset();
 
@@ -63,7 +60,7 @@
      * @param scope A JQuery selector to find for the row to 'activate'.
      * @param activeBusColumn
      */
-    activateActiveBusColumnInInterface(scope: JQuery, activeBusColumn?: ActiveBusColumn) {
+    activateActiveBusColumnInInterface(scope: JQuery, activeBusColumn?: ActiveBusColumn): void {
         scope.find('.active-bus-line').removeClass('active-bus-line');
 
         if (activeBusColumn) {
@@ -75,7 +72,7 @@
      * Load the dead letter queue messages.
      * @param activeBusColumn
      */
-    loadDeadletterQueueMessages(activeBusColumn: ActiveBusColumn) {
+    loadDeadletterQueueMessages(activeBusColumn: ActiveBusColumn): void {
         var dlqContainer = '#' + this.options.containers.deadletterMessages;
         $(dlqContainer).show();
 
@@ -94,7 +91,7 @@
      * Load Application Insights data based on a timestamp of which the message was enqueued.
      * @param enqueuedDateTime
      */
-    showApplicationInsightsData(enqueuedDateTime: string) {
+    showApplicationInsightsData(enqueuedDateTime: string): void {
         var aiContainer = '#' + this.options.containers.applicationInsights;
         $(aiContainer).show();
 
@@ -111,12 +108,5 @@
             "No logs found.");
 
         loader.start(data);
-    }
-
-    /**
-     * Register the necessary components, actions, etc.
-     */
-    private registerComponents(): void {
-
     }
 }

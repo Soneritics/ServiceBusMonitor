@@ -25,33 +25,6 @@
         if (this.showLoaderIcon) {
             $(this.selector).html(this.loaderHtml);
         }
-        /*
-        $.ajax({
-                url: this.url,
-                method: data === null ? "GET" : "POST",
-                data: data,
-                dataType: "json",
-                success: (response, status, xhr) => {
-                    if (this.showLoaderIcon) {
-                        $(this.selector).html("");
-                    }
-
-                    if (this.callbackHandler) {
-                        this.callbackHandler.handle(response);
-                    } else {
-                        $(this.selector).html(response);
-                    }
-                }
-            })
-            .fail(() => {
-                alert("error"); // todo
-            })
-            .always(() => {
-                if (this.loop) {
-                    setTimeout(() => { this.reload(data); }, this.timeout);
-                }
-            });
-        */
 
         $.get(this.url, data,
             (response, status, xhr) => {
