@@ -6,7 +6,12 @@ const nodeRoot = "./node_modules";
 const targetPath = "./wwwroot/lib";
 
 function clean(cb) {
-    del([targetPath + "/**/*"]);
+    del([
+        targetPath + "/**/*",
+        "./wwwroot/js/ServiceBusMonitor.js",
+        "./wwwroot/js/ServiceBusMonitor.js.map"
+    ]);
+
     cb();
 }
 

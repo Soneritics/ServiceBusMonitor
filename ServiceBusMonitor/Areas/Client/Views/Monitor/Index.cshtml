@@ -13,28 +13,14 @@
 
 <p>
     Last update:
-    <span
-        class="auto-update"
-        data-show-loader-icon="1"
-        data-url="@Url.Action("Update", "Updater", new { area = "Api" })"
-        data-timeout="10000"></span>
+    <span id="last-update"></span>
 </p>
 
 <p>Queues:</p>
-<div
-    id="bus-queues"
-    class="auto-update"
-    data-has-callback="1"
-    data-url="@Url.Action("Queues", "Bus", new { area = "Api", busName = Model.ActiveBus })"
-    data-timeout="5000"></div>
+<div id="bus-queues"></div>
 
 <p>Topics:</p>
-<div
-    id="bus-topics"
-    class="auto-update"
-    data-has-callback="1"
-    data-url="@Url.Action("Topics", "Bus", new { area = "Api", busName = Model.ActiveBus })"
-    data-timeout="5000"></div>
+<div id="bus-topics"></div>
     
 <div id="dlq-messages-holder">
     <p>DLQ Messages</p>
@@ -46,26 +32,27 @@
     <div id="dlq-message-ai-logs"></div>
 </div>
 
-<script>
-    // Loader image, when applicable
-    var loaderHtml = '<i class="fas fa-circle-notch fa-spin"></i>';
+@section Scripts {
+    <script>
+    var endpoints = new Endpoints();
+    endpoints.lastUpdate = "@Url.Action("Update", "Updater", new { area = "Api" })";
+    endpoints.queues = "@Url.Action("Queues", "Bus", new { area = "Api", busName = Model.ActiveBus })";
+    endpoints.topics = "@Url.Action("Topics", "Bus", new { area = "Api", busName = Model.ActiveBus })";
+    endpoints.dlqMessagesOnQueue = "@Url.Action("DlqMessagesOnQueue", "Bus", new { area = "Api" })";
+    endpoints.dlqMessagesOnTopic = "@Url.Action("DlqMessagesOnTopic", "Bus", new { area = "Api" })";
+    endpoints.exceptionLogs = "@Url.Action("GetExceptionLogs", "ApplicationInsights", new { area = "Api" })";
+    endpoints.actionRemoveDlqMessageFromQueue = "@Url.Action("RemoveDlqMessageFromQueue", "Bus", new { area = "Api" })";
+    endpoints.actionRemoveDlqMessageFromTopicSubscription = "@Url.Action("RemoveDlqMessageFromTopicSubscription", "Bus", new { area = "Api" })";
 
-    // Reset all UI elements
-    var resetInterface = function() {
-        $('#dlq-messages-holder').hide();
-        $('#dlq-message-ai-logs-holder').hide();
-    };
+    var sb = new ServiceBusMonitor(new ServiceBusOptions(endpoints));
+    
+    $(function() {
+        sb.init();
+    });
 
+    /*
     // Active bus column hash
     var activeBusColumn = '';
-
-    var activateBusColumnInInterface = function(scope) {
-        scope.find('.active-bus-line').removeClass('active-bus-line');
-
-        if (activeBusColumn !== '') {
-            $(scope).find('tr[data-hash="' + activeBusColumn + '"]').addClass('active-bus-line');
-        }
-    };
 
     // Column click handler on bus topic/queue
     var clickBusColumn = function(hash) {
@@ -82,16 +69,16 @@
         var busType = element.data('bus-type');
 
         switch (busType) {
-            case 'queue':
-                var busName = element.data('bus-name');
-                loadDlqMessagesFromQueue(busName);
-                break;
+        case 'queue':
+            var busName = element.data('bus-name');
+            loadDlqMessagesFromQueue(busName);
+            break;
 
-            case 'topic':
-                var busName = element.data('bus-name');
-                var busSubscription = element.data('bus-subscription');
-                loadDlqMessagesFromTopicSubscription(busName, busSubscription);
-                break;
+        case 'topic':
+            var busName = element.data('bus-name');
+            var busSubscription = element.data('bus-subscription');
+            loadDlqMessagesFromTopicSubscription(busName, busSubscription);
+            break;
         }
 
         $('#dlq-messages-holder').show();
@@ -145,24 +132,24 @@
                     var data = {};
 
                     switch (busType) {
-                        case 'queue':
-                            apiBaseUri = '@Url.Action("RemoveDlqMessageFromQueue", "Bus", new { area = "Api" })';
-                            data = {
-                                busName: '@Model.ActiveBus',
-                                queueName: element.data('bus-name'),
-                                messageId: message.id
-                            };
-                            break;
+                    case 'queue':
+                        apiBaseUri = '@Url.Action("RemoveDlqMessageFromQueue", "Bus", new { area = "Api" })';
+                        data = {
+                            busName: '@Model.ActiveBus',
+                            queueName: element.data('bus-name'),
+                            messageId: message.id
+                        };
+                        break;
 
-                        case 'topic':
-                            apiBaseUri = '@Url.Action("RemoveDlqMessageFromTopicSubscription", "Bus", new { area = "Api" })';
-                            data = {
-                                busName: '@Model.ActiveBus',
-                                topicName: element.data('bus-name'),
-                                subscriptionName: element.data('bus-subscription'),
-                                messageId: message.id
-                            };
-                            break;
+                    case 'topic':
+                        apiBaseUri = '@Url.Action("RemoveDlqMessageFromTopicSubscription", "Bus", new { area = "Api" })';
+                        data = {
+                            busName: '@Model.ActiveBus',
+                            topicName: element.data('bus-name'),
+                            subscriptionName: element.data('bus-subscription'),
+                            messageId: message.id
+                        };
+                        break;
                     }
 
                     $.ajax({
@@ -200,6 +187,11 @@
         });
     };
 
+
+
+
+
+
     var loadDlqMessagesFromQueue = function(queueName) {
         var apiBaseUri = '@Url.Action("DlqMessagesOnQueue", "Bus", new { area = "Api" })';
         var data = {
@@ -224,6 +216,12 @@
             showDlqMessagesTable(json);
         });
     };
+
+
+
+
+
+
 
     // Application Insights data
     var showApplicationInsightsData = function(enqueueTimeUtc) {
@@ -269,156 +267,6 @@
             $('#dlq-message-ai-logs').append(table);
         }
     };
-
-    // Auto reload method
-    var reload = function(obj) {
-        var url = $(obj).data('url');
-        var timeout = $(obj).data('timeout');
-
-        if ($(obj).data('show-loader-icon')) {
-            $(obj).html(loaderHtml);
-        }
-
-        $.get(url, function(data) {
-            if ($(obj).data('has-callback')) {
-                $(obj).trigger('callback', {result: data});
-            } else {
-                $(obj).html(data);
-            }
-            
-            setTimeout(function() {
-                reload(obj);
-            }, timeout);
-        });
-    };
-
-    // Init method that binds callbacks
-    var bindCallbacks = function() {
-        $('#bus-queues').on('callback', function(e, data) {
-            var table = $(
-                '<table class="table table-striped table-hover">' +
-                '   <thead>' +
-                '       <tr>' +
-                '           <th>Queue</th>' +
-                '           <th>Active</th>' +
-                '           <th>DLQ</th>' +
-                '       </tr>' +
-                '   </thead>' +
-                '   <tbody></tbody>' +
-                '</table>');
-
-            if (data != undefined && data.result != undefined) {
-                data.result.forEach(queue => {
-                    var tr = $('<tr></tr>');
-                    tr.attr('data-hash', 'queue-' + queue.name);
-                    tr.attr('data-bus-type', 'queue');
-                    tr.attr('data-bus-name', queue.name);
-
-                    var td = $('<td></td>');
-                    td.text(queue.name);
-                    tr.append(td);
-
-                    td = $('<td></td>');
-                    td.text(queue.activeMessages);
-                    tr.append(td);
-
-                    td = $('<td></td>');
-                    td.text(queue.deadLetteredMessages);
-                    tr.append(td);
-
-                    table.find('tbody').append(tr);
-                });
-            }
-
-            activateBusColumnInInterface(table);
-
-            var target = $(e.target);
-            var html = table[0].outerHTML;
-            if (target.html() !== html) {
-                target.html(html);
-
-                target.find('tbody > tr').on('click', function() {
-                    clickBusColumn($(this).data('hash'));
-                });
-            }
-        });
-
-        $('#bus-topics').on('callback', function(e, data) {
-            var table = $(
-                '<table class="table table-striped table-hover">' +
-                '   <thead>' +
-                '       <tr>' +
-                '           <th>Topic</th>' +
-                '           <th>Subscription</th>' +
-                '           <th>Active</th>' +
-                '           <th>DLQ</th>' +
-                '       </tr>' +
-                '   </thead>' +
-                '   <tbody></tbody>' +
-                '</table>');
-
-            if (data != undefined && data.result != undefined) {
-                data.result.forEach(topic => {
-                    if (topic.subscriptions == null || topic.subscriptions.length === 0) {
-                        var tr = $('<tr></tr>');
-                        tr.attr('data-hash', 'topic-' + topic.name);
-
-                        var td = $('<td cellspan="4"></td>');
-                        td.text(topic.name);
-                        tr.append(td);
-
-                        table.find('tbody').append(tr);
-                    } else {
-                        topic.subscriptions.forEach(subscription => {
-                            var tr = $('<tr></tr>');
-                            tr.attr('data-hash', 'topic-' + topic.name + '-' + subscription.name);
-                            tr.attr('data-bus-type', 'topic');
-                            tr.attr('data-bus-name', topic.name);
-                            tr.attr('data-bus-subscription', subscription.name);
-
-                            var td = $('<td></td>');
-                            td.text(topic.name);
-                            tr.append(td);
-
-                            td = $('<td></td>');
-                            td.text(subscription.name);
-                            tr.append(td);
-
-                            td = $('<td></td>');
-                            td.text(subscription.activeMessages);
-                            tr.append(td);
-
-                            td = $('<td></td>');
-                            td.text(subscription.deadLetteredMessages);
-                            tr.append(td);
-
-                            table.find('tbody').append(tr);
-                        });
-                    }
-                });
-            }
-
-            activateBusColumnInInterface(table);
-
-            var target = $(e.target);
-            var html = table[0].outerHTML;
-            if (target.html() !== html) {
-                target.html(html);
-
-                target.find('tbody > tr').on('click', function() {
-                    clickBusColumn($(this).data('hash'));
-                });
-            }
-        });
-    };
-
-    // Function that runs when the page has loaded and all necessary scripts have been initialized
-    windowload.push(function() {
-        resetInterface();
-        bindCallbacks();
-
-        $('.auto-update').each(function() {
-            reload(this);
-        });
-    });
+    */
 </script>
+}
