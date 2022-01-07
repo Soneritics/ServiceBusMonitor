@@ -15,16 +15,29 @@ var ServiceBusMonitor = /** @class */ (function () {
         this.eventHandler.on('ActivateBusColumn', function (column) { return _this.activateBusColumn(column); });
         // Activate the column in the UI
         this.eventHandler.on('ActivateActiveBusColumnInInterface', function (selector) { return _this.activateActiveBusColumnInInterface(selector); });
+        // Fetch Application Insights data
+        this.eventHandler.on('ShowApplicationInsightsData', function (enqueuedDateTime) { return _this.showApplicationInsightsData(enqueuedDateTime); });
     };
     ServiceBusMonitor.prototype.activateBusColumn = function (column) {
         this.ui.reset();
+        // Determine the active bus column
+        // If an inactive column is clicked, make it active.
+        // If an active column is clicked, make it inactive.
         this.activeBusColumn = this.activeBusColumn === null || this.activeBusColumn.hash !== column.hash
             ? column
             : null;
+        // Trigger the UI event to activate the correct column
         this.eventHandler.trigger("ActivateActiveBusColumnInInterface", $("body"));
+        // Load the deadletter queue messages
+        if (this.activeBusColumn) {
+            this.ui.loadDeadletterQueueMessages(this.activeBusColumn);
+        }
     };
     ServiceBusMonitor.prototype.activateActiveBusColumnInInterface = function (selector) {
         this.ui.activateActiveBusColumnInInterface(selector, this.activeBusColumn);
+    };
+    ServiceBusMonitor.prototype.showApplicationInsightsData = function (enqueuedDateTime) {
+        this.ui.showApplicationInsightsData(enqueuedDateTime);
     };
     return ServiceBusMonitor;
 }());
@@ -74,7 +87,8 @@ var Endpoints = /** @class */ (function () {
     return Endpoints;
 }());
 var ServiceBusOptions = /** @class */ (function () {
-    function ServiceBusOptions(endpoints, containers) {
+    function ServiceBusOptions(activeBus, endpoints, containers) {
+        this.activeBus = activeBus;
         this.endpoints = endpoints;
         this.containers = containers !== null && containers !== void 0 ? containers : new Containers();
     }
@@ -117,66 +131,61 @@ var UI = /** @class */ (function () {
         // First, reset the UI
         this.reset();
         // Reload the last update timestamp
-        (new Reloader("#" + this.options.containers.lastUpdate, this.options.endpoints.lastUpdate, 10000)).start();
+        (new Loader("#" + this.options.containers.lastUpdate, this.options.endpoints.lastUpdate, 10000)).start();
         // Reload the service bus queues
-        var queueReloader = new Reloader("#" + this.options.containers.queues, this.options.endpoints.queues, 5000, false);
+        var queueReloader = new Loader("#" + this.options.containers.queues, this.options.endpoints.queues, 5000, false);
         queueReloader.callbackHandler = new BusQueueCallbackHandler("#" + this.options.containers.queues, this.eventHandler);
         queueReloader.start();
         // Reload the service bus topics and subscriptions
-        var subscriptionReloader = new Reloader("#" + this.options.containers.topics, this.options.endpoints.topics, 5000, false);
+        var subscriptionReloader = new Loader("#" + this.options.containers.topics, this.options.endpoints.topics, 5000, false);
         subscriptionReloader.callbackHandler = new BusSubscriptionCallbackHandler("#" + this.options.containers.topics, this.eventHandler);
         subscriptionReloader.start();
     };
+    /**
+     * Activate the active bus column in the interface, in a given scope.
+     * @param scope A JQuery selector to find for the row to 'activate'.
+     * @param activeBusColumn
+     */
     UI.prototype.activateActiveBusColumnInInterface = function (scope, activeBusColumn) {
         scope.find('.active-bus-line').removeClass('active-bus-line');
-        if (activeBusColumn !== null) {
+        if (activeBusColumn) {
             $(scope).find('tr[data-hash="' + activeBusColumn.hash + '"]').addClass('active-bus-line');
         }
     };
+    /**
+     * Load the dead letter queue messages.
+     * @param activeBusColumn
+     */
+    UI.prototype.loadDeadletterQueueMessages = function (activeBusColumn) {
+        var dlqContainer = '#' + this.options.containers.deadletterMessages;
+        $(dlqContainer).show();
+        var selector = dlqContainer + " > div";
+        var data = (new DeadLetterQueuePostDataParser()).parse(this.options, activeBusColumn);
+        var url = activeBusColumn.queue
+            ? this.options.endpoints.dlqMessagesOnQueue
+            : this.options.endpoints.dlqMessagesOnTopic;
+        var loader = new Loader(selector, url, 0, true, false);
+        loader.callbackHandler = new DlqMessagesCallbackHandler(selector, this.eventHandler);
+        loader.start(data);
+    };
+    /**
+     * Load Application Insights data based on a timestamp of which the message was enqueued.
+     * @param enqueuedDateTime
+     */
+    UI.prototype.showApplicationInsightsData = function (enqueuedDateTime) {
+        var aiContainer = '#' + this.options.containers.applicationInsights;
+        $(aiContainer).show();
+        var selector = aiContainer + " > div";
+        var url = this.options.endpoints.exceptionLogs;
+        var data = {
+            busName: this.options.activeBus,
+            dateTime: enqueuedDateTime
+        };
+        var loader = new Loader(selector, url, 0, true, false);
+        loader.callbackHandler = new GenericTableBuilderCallbackHandler(selector, "No logs found.");
+        loader.start(data);
+    };
     return UI;
-}());
-var Reloader = /** @class */ (function () {
-    function Reloader(selector, url, timeout, showLoaderIcon, loop) {
-        this.loaderHtml = '<i class="fas fa-circle-notch fa-spin"></i>';
-        this.loop = true;
-        this.showLoaderIcon = true;
-        this.selector = selector;
-        this.url = url;
-        this.timeout = timeout !== null && timeout !== void 0 ? timeout : 10000;
-        this.showLoaderIcon = showLoaderIcon !== null && showLoaderIcon !== void 0 ? showLoaderIcon : true;
-        this.loop = loop !== null && loop !== void 0 ? loop : true;
-    }
-    Reloader.prototype.reload = function () {
-        var _this = this;
-        if (this.showLoaderIcon) {
-            $(this.selector).html(this.loaderHtml);
-        }
-        $.get(this.url, function (response, status, xhr) {
-            if (_this.showLoaderIcon) {
-                $(_this.selector).html("");
-            }
-            if (_this.callbackHandler) {
-                _this.callbackHandler.handle(response);
-            }
-            else {
-                $(_this.selector).html(response);
-            }
-        })
-            .fail(function () {
-            alert("error"); // todo
-        })
-            .always(function () {
-            if (_this.loop) {
-                setTimeout(function () {
-                    _this.reload();
-                }, _this.timeout);
-            }
-        });
-    };
-    Reloader.prototype.start = function () {
-        this.reload();
-    };
-    return Reloader;
 }());
 var BusQueueCallbackHandler = /** @class */ (function () {
     function BusQueueCallbackHandler(selector, eventHandler) {
@@ -259,8 +268,8 @@ var BusSubscriptionCallbackHandler = /** @class */ (function () {
                     topic.subscriptions.forEach(function (subscription) {
                         var tr = $('<tr></tr>');
                         tr.attr('data-hash', 'topic-' + topic.name + '-' + subscription.name);
-                        tr.attr('topic-name', topic.name);
-                        tr.attr('subscription-name', subscription.name);
+                        tr.attr('data-topic-name', topic.name);
+                        tr.attr('data-subscription-name', subscription.name);
                         var td = $('<td></td>');
                         td.text(topic.name);
                         tr.append(td);
@@ -292,5 +301,173 @@ var BusSubscriptionCallbackHandler = /** @class */ (function () {
         }
     };
     return BusSubscriptionCallbackHandler;
+}());
+var DlqMessagesCallbackHandler = /** @class */ (function () {
+    function DlqMessagesCallbackHandler(selector, eventHandler) {
+        this.selector = selector;
+        this.eventHandler = eventHandler;
+    }
+    DlqMessagesCallbackHandler.prototype.handle = function (messages) {
+        var _this = this;
+        var table = $('<table class="table table-striped table-hover">' +
+            '   <thead>' +
+            '       <tr>' +
+            '           <th>Enqueued</th>' +
+            '           <th>Content</th>' +
+            '       </tr>' +
+            '   </thead>' +
+            '   <tbody></tbody>' +
+            '</table>');
+        if (messages) {
+            messages.forEach(function (message) {
+                var tr = $('<tr></tr>');
+                tr.attr('data-message-id', message.id);
+                tr.attr('data-message-enqueued', message.enqueued);
+                var td = $('<td></td>');
+                td.text(message.enqueued);
+                tr.append(td);
+                td = $('<td></td>');
+                td.text(message.content);
+                var lineActions = $('<div></div>');
+                // todo: actions
+                td.append(lineActions);
+                tr.append(td);
+                table.find('tbody').append(tr);
+            });
+        }
+        var target = $(this.selector);
+        target.html('');
+        target.append(table);
+        target.find('tbody > tr').on('click', function (e) {
+            target.find('.active-message-line').removeClass('active-message-line');
+            $(e.currentTarget).addClass('active-message-line');
+            _this.eventHandler.trigger("ShowApplicationInsightsData", $(e.currentTarget).data('message-enqueued'));
+        });
+    };
+    return DlqMessagesCallbackHandler;
+}());
+var GenericTableBuilderCallbackHandler = /** @class */ (function () {
+    function GenericTableBuilderCallbackHandler(selector, noResultsText) {
+        this.noResultsText = noResultsText;
+        this.selector = selector;
+    }
+    GenericTableBuilderCallbackHandler.prototype.handle = function (json) {
+        if (!json) {
+            $(this.selector).html('<em>' + this.noResultsText + '</em>');
+            return;
+        }
+        var table = $('<table class="table table-striped table-hover table-sm"><thead><tr></tr></thead><tbody></tbody></table>');
+        for (var heading in json[0]) {
+            var th = $('<th></th>');
+            th.text(heading);
+            $(table).find('thead > tr').append(th);
+        }
+        for (var row in json) {
+            var tr = $('<tr></tr>');
+            for (var heading in json[row]) {
+                var td = $('<td></td>');
+                td.text(json[row][heading]);
+                tr.append(td);
+            }
+            $(table).children('tbody').append(tr);
+        }
+        $(this.selector).html("");
+        $(this.selector).append(table);
+    };
+    return GenericTableBuilderCallbackHandler;
+}());
+var DeadLetterQueuePostDataParser = /** @class */ (function () {
+    function DeadLetterQueuePostDataParser() {
+    }
+    DeadLetterQueuePostDataParser.prototype.parse = function (options, activeBusColumn) {
+        if (activeBusColumn.subscription) {
+            return this.parseFromSubscription(options, activeBusColumn);
+        }
+        else {
+            return this.parseFromQueue(options, activeBusColumn);
+        }
+    };
+    DeadLetterQueuePostDataParser.prototype.parseFromQueue = function (options, activeBusColumn) {
+        return {
+            busName: options.activeBus,
+            queueName: activeBusColumn.queue.queueName
+        };
+    };
+    DeadLetterQueuePostDataParser.prototype.parseFromSubscription = function (options, activeBusColumn) {
+        return {
+            busName: options.activeBus,
+            topicName: activeBusColumn.subscription.topicName,
+            subscriptionName: activeBusColumn.subscription.subscriptionName
+        };
+    };
+    return DeadLetterQueuePostDataParser;
+}());
+var Loader = /** @class */ (function () {
+    function Loader(selector, url, timeout, showLoaderIcon, loop) {
+        this.loaderHtml = '<i class="fas fa-circle-notch fa-spin"></i>';
+        this.loop = true;
+        this.showLoaderIcon = true;
+        this.selector = selector;
+        this.url = url;
+        this.timeout = timeout !== null && timeout !== void 0 ? timeout : 10000;
+        this.showLoaderIcon = showLoaderIcon !== null && showLoaderIcon !== void 0 ? showLoaderIcon : true;
+        this.loop = loop !== null && loop !== void 0 ? loop : true;
+    }
+    Loader.prototype.reload = function (data) {
+        var _this = this;
+        if (this.showLoaderIcon) {
+            $(this.selector).html(this.loaderHtml);
+        }
+        /*
+        $.ajax({
+                url: this.url,
+                method: data === null ? "GET" : "POST",
+                data: data,
+                dataType: "json",
+                success: (response, status, xhr) => {
+                    if (this.showLoaderIcon) {
+                        $(this.selector).html("");
+                    }
+
+                    if (this.callbackHandler) {
+                        this.callbackHandler.handle(response);
+                    } else {
+                        $(this.selector).html(response);
+                    }
+                }
+            })
+            .fail(() => {
+                alert("error"); // todo
+            })
+            .always(() => {
+                if (this.loop) {
+                    setTimeout(() => { this.reload(data); }, this.timeout);
+                }
+            });
+        */
+        $.get(this.url, data, function (response, status, xhr) {
+            if (_this.showLoaderIcon) {
+                $(_this.selector).html("");
+            }
+            if (_this.callbackHandler) {
+                _this.callbackHandler.handle(response);
+            }
+            else {
+                $(_this.selector).html(response);
+            }
+        })
+            .fail(function () {
+            alert("error"); // todo
+        })
+            .always(function () {
+            if (_this.loop) {
+                setTimeout(function () { _this.reload(data); }, _this.timeout);
+            }
+        });
+    };
+    Loader.prototype.start = function (data) {
+        this.reload(data);
+    };
+    return Loader;
 }());
 //# sourceMappingURL=ServiceBusMonitor.js.map

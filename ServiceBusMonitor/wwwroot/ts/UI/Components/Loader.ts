@@ -1,4 +1,4 @@
-﻿class Reloader {
+﻿class Loader {
     loaderHtml: string = '<i class="fas fa-circle-notch fa-spin"></i>';
     private readonly selector: string;
     private readonly url: string;
@@ -21,17 +21,45 @@
         this.loop = loop ?? true;
     }
 
-    reload(): void {
+    reload(data? : any): void {
         if (this.showLoaderIcon) {
             $(this.selector).html(this.loaderHtml);
         }
+        /*
+        $.ajax({
+                url: this.url,
+                method: data === null ? "GET" : "POST",
+                data: data,
+                dataType: "json",
+                success: (response, status, xhr) => {
+                    if (this.showLoaderIcon) {
+                        $(this.selector).html("");
+                    }
 
-        $.get(this.url, (response, status, xhr) => {
+                    if (this.callbackHandler) {
+                        this.callbackHandler.handle(response);
+                    } else {
+                        $(this.selector).html(response);
+                    }
+                }
+            })
+            .fail(() => {
+                alert("error"); // todo
+            })
+            .always(() => {
+                if (this.loop) {
+                    setTimeout(() => { this.reload(data); }, this.timeout);
+                }
+            });
+        */
+
+        $.get(this.url, data,
+            (response, status, xhr) => {
                 if (this.showLoaderIcon) {
                     $(this.selector).html("");
                 }
 
-            if (this.callbackHandler) {
+                if (this.callbackHandler) {
                     this.callbackHandler.handle(response);
                 } else {
                     $(this.selector).html(response);
@@ -42,16 +70,12 @@
             })
             .always(() => {
                 if (this.loop) {
-                    setTimeout(() => {
-                            this.reload();
-                        },
-                        this.timeout
-                    );
+                    setTimeout(() => { this.reload(data); }, this.timeout);
                 }
             });
     }
 
-    start(): void {
-        this.reload();
+    start(data?: any): void {
+        this.reload(data);
     }
 }

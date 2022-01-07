@@ -30,19 +30,37 @@
         this.eventHandler.on(
             'ActivateActiveBusColumnInInterface',
             (selector: JQuery) => this.activateActiveBusColumnInInterface(selector));
+
+        // Fetch Application Insights data
+        this.eventHandler.on(
+            'ShowApplicationInsightsData',
+            (enqueuedDateTime: string) => this.showApplicationInsightsData(enqueuedDateTime));
     }
 
-    private activateBusColumn(column: ActiveBusColumn) {
+    private activateBusColumn(column: ActiveBusColumn): void {
         this.ui.reset();
 
+        // Determine the active bus column
+        // If an inactive column is clicked, make it active.
+        // If an active column is clicked, make it inactive.
         this.activeBusColumn = this.activeBusColumn === null || this.activeBusColumn.hash !== column.hash
             ? column
             : null;
 
+        // Trigger the UI event to activate the correct column
         this.eventHandler.trigger("ActivateActiveBusColumnInInterface", $("body"));
+
+        // Load the deadletter queue messages
+        if (this.activeBusColumn) {
+            this.ui.loadDeadletterQueueMessages(this.activeBusColumn);
+        }
     }
 
-    private activateActiveBusColumnInInterface(selector: JQuery) {
+    private activateActiveBusColumnInInterface(selector: JQuery): void {
         this.ui.activateActiveBusColumnInInterface(selector, this.activeBusColumn);
+    }
+
+    private showApplicationInsightsData(enqueuedDateTime: string): void {
+        this.ui.showApplicationInsightsData(enqueuedDateTime);
     }
 }

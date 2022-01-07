@@ -37,8 +37,8 @@
                     topic.subscriptions.forEach(subscription => {
                         var tr = $('<tr></tr>');
                         tr.attr('data-hash', 'topic-' + topic.name + '-' + subscription.name);
-                        tr.attr('topic-name', topic.name);
-                        tr.attr('subscription-name', subscription.name);
+                        tr.attr('data-topic-name', topic.name);
+                        tr.attr('data-subscription-name', subscription.name);
 
                         var td = $('<td></td>');
                         td.text(topic.name);
