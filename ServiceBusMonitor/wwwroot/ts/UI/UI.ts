@@ -19,6 +19,9 @@
      * Initialize the User Interface.
      */
     init() {
+        // First, register the components and actions that listen to events
+        this.registerComponents();
+
         // First, reset the UI
         this.reset();
 
@@ -108,5 +111,12 @@
             "No logs found.");
 
         loader.start(data);
+    }
+
+    /**
+     * Register the necessary components, actions, etc.
+     */
+    private registerComponents(): void {
+
     }
 }

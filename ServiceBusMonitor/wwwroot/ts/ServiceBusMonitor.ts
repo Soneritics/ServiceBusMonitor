@@ -35,6 +35,16 @@
         this.eventHandler.on(
             'ShowApplicationInsightsData',
             (enqueuedDateTime: string) => this.showApplicationInsightsData(enqueuedDateTime));
+
+        // Load or reload the DLQ messages
+        this.eventHandler.on(
+            'LoadDeadletterQueueMessages',
+            () => this.loadDeadletterQueueMessages());
+
+        // Process actions on a queue message
+        this.eventHandler.on(
+            'ProcessActions',
+            (actionData: ActionData) => this.processActions(actionData));
     }
 
     private activateBusColumn(column: ActiveBusColumn): void {
@@ -52,8 +62,12 @@
 
         // Load the deadletter queue messages
         if (this.activeBusColumn) {
-            this.ui.loadDeadletterQueueMessages(this.activeBusColumn);
+            this.eventHandler.trigger("LoadDeadletterQueueMessages");
         }
+    }
+
+    private loadDeadletterQueueMessages(): void {
+        this.ui.loadDeadletterQueueMessages(this.activeBusColumn);
     }
 
     private activateActiveBusColumnInInterface(selector: JQuery): void {
@@ -62,5 +76,17 @@
 
     private showApplicationInsightsData(enqueuedDateTime: string): void {
         this.ui.showApplicationInsightsData(enqueuedDateTime);
+    }
+
+    private processActions(actionData: ActionData): void {
+        (new SaveAction()).process(
+            actionData,
+            this.activeBusColumn,
+            this.options);
+
+        (new DeleteAction(this.eventHandler)).process(
+            actionData,
+            this.activeBusColumn,
+            this.options);
     }
 }

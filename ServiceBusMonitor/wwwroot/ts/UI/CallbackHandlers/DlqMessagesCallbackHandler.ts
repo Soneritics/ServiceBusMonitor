@@ -33,7 +33,11 @@
                 td.text(message.content);
 
                 var lineActions = $('<div></div>');
-                // todo: actions
+
+                this.eventHandler.trigger(
+                    "ProcessActions",
+                    new ActionData(lineActions, message));
+
                 td.append(lineActions);
 
                 tr.append(td);

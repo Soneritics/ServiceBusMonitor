@@ -17,6 +17,10 @@ var ServiceBusMonitor = /** @class */ (function () {
         this.eventHandler.on('ActivateActiveBusColumnInInterface', function (selector) { return _this.activateActiveBusColumnInInterface(selector); });
         // Fetch Application Insights data
         this.eventHandler.on('ShowApplicationInsightsData', function (enqueuedDateTime) { return _this.showApplicationInsightsData(enqueuedDateTime); });
+        // Load or reload the DLQ messages
+        this.eventHandler.on('LoadDeadletterQueueMessages', function () { return _this.loadDeadletterQueueMessages(); });
+        // Process actions on a queue message
+        this.eventHandler.on('ProcessActions', function (actionData) { return _this.processActions(actionData); });
     };
     ServiceBusMonitor.prototype.activateBusColumn = function (column) {
         this.ui.reset();
@@ -30,14 +34,21 @@ var ServiceBusMonitor = /** @class */ (function () {
         this.eventHandler.trigger("ActivateActiveBusColumnInInterface", $("body"));
         // Load the deadletter queue messages
         if (this.activeBusColumn) {
-            this.ui.loadDeadletterQueueMessages(this.activeBusColumn);
+            this.eventHandler.trigger("LoadDeadletterQueueMessages");
         }
+    };
+    ServiceBusMonitor.prototype.loadDeadletterQueueMessages = function () {
+        this.ui.loadDeadletterQueueMessages(this.activeBusColumn);
     };
     ServiceBusMonitor.prototype.activateActiveBusColumnInInterface = function (selector) {
         this.ui.activateActiveBusColumnInInterface(selector, this.activeBusColumn);
     };
     ServiceBusMonitor.prototype.showApplicationInsightsData = function (enqueuedDateTime) {
         this.ui.showApplicationInsightsData(enqueuedDateTime);
+    };
+    ServiceBusMonitor.prototype.processActions = function (actionData) {
+        (new SaveAction()).process(actionData, this.activeBusColumn, this.options);
+        (new DeleteAction(this.eventHandler)).process(actionData, this.activeBusColumn, this.options);
     };
     return ServiceBusMonitor;
 }());
@@ -128,6 +139,8 @@ var UI = /** @class */ (function () {
      * Initialize the User Interface.
      */
     UI.prototype.init = function () {
+        // First, register the components and actions that listen to events
+        this.registerComponents();
         // First, reset the UI
         this.reset();
         // Reload the last update timestamp
@@ -185,7 +198,79 @@ var UI = /** @class */ (function () {
         loader.callbackHandler = new GenericTableBuilderCallbackHandler(selector, "No logs found.");
         loader.start(data);
     };
+    /**
+     * Register the necessary components, actions, etc.
+     */
+    UI.prototype.registerComponents = function () {
+    };
     return UI;
+}());
+var ActionData = /** @class */ (function () {
+    function ActionData(container, message) {
+        this.container = container;
+        this.message = message;
+    }
+    return ActionData;
+}());
+var DeleteAction = /** @class */ (function () {
+    function DeleteAction(eventHandler) {
+        this.eventHandler = eventHandler;
+    }
+    DeleteAction.prototype.process = function (actionData, activeBusColumn, options) {
+        var _this = this;
+        var deleteAction = $('<a href="javascript:;">Delete</a>');
+        deleteAction.on('click', function () {
+            $(_this).off('click');
+            //$(this).html(loaderHtml);
+            var apiBaseUri = "";
+            var data = {};
+            switch (activeBusColumn.queue ? true : false) {
+                case true:
+                    apiBaseUri = options.endpoints.actionRemoveDlqMessageFromQueue;
+                    data = {
+                        busName: options.activeBus,
+                        queueName: activeBusColumn.queue.queueName,
+                        messageId: actionData.message.id
+                    };
+                    break;
+                default:
+                    apiBaseUri = options.endpoints.actionRemoveDlqMessageFromTopicSubscription;
+                    data = {
+                        busName: options.activeBus,
+                        topicName: activeBusColumn.subscription.topicName,
+                        subscriptionName: activeBusColumn.subscription.subscriptionName,
+                        messageId: actionData.message.id
+                    };
+                    break;
+            }
+            $.ajax({
+                type: "POST",
+                url: apiBaseUri,
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function () {
+                    _this.eventHandler.trigger("LoadDeadletterQueueMessages");
+                }
+            });
+            return false;
+        });
+        actionData.container.append(deleteAction);
+    };
+    return DeleteAction;
+}());
+var SaveAction = /** @class */ (function () {
+    function SaveAction() {
+    }
+    SaveAction.prototype.process = function (actionData, activeBusColumn, options) {
+        var downloadAction = $('<a href="javascript:;">Download</a>');
+        downloadAction.on('click', function () {
+            var blob = new Blob([actionData.message.content], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, "msg-" + actionData.message.id + ".json");
+            return false;
+        });
+        actionData.container.append(downloadAction);
+    };
+    return SaveAction;
 }());
 var BusQueueCallbackHandler = /** @class */ (function () {
     function BusQueueCallbackHandler(selector, eventHandler) {
@@ -329,7 +414,7 @@ var DlqMessagesCallbackHandler = /** @class */ (function () {
                 td = $('<td></td>');
                 td.text(message.content);
                 var lineActions = $('<div></div>');
-                // todo: actions
+                _this.eventHandler.trigger("ProcessActions", new ActionData(lineActions, message));
                 td.append(lineActions);
                 tr.append(td);
                 table.find('tbody').append(tr);

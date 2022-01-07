@@ -9,6 +9,8 @@
   <ItemGroup>
     <Content Remove="wwwroot\ts\Components\EventHandler.ts" />
     <Content Remove="wwwroot\ts\ServiceBusOptions.ts" />
+    <Content Remove="wwwroot\ts\UI\Actions\ActionData.ts" />
+    <Content Remove="wwwroot\ts\UI\Actions\IAction.ts" />
     <Content Remove="wwwroot\ts\UI\CallbackHandlers\BusQueueCallbackHandler.ts" />
     <Content Remove="wwwroot\ts\UI\CallbackHandlers\BusSubscriptionCallbackHandler.ts" />
     <Content Remove="wwwroot\ts\UI\CallbackHandlers\DlqMessagesCallbackHandler.ts" />
@@ -34,6 +36,8 @@
   <ItemGroup>
     <TypeScriptCompile Include="wwwroot\ts\Components\EventHandler.ts" />
     <TypeScriptCompile Include="wwwroot\ts\Config\ServiceBusOptions.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\UI\Actions\ActionData.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\UI\Actions\IAction.ts" />
     <TypeScriptCompile Include="wwwroot\ts\UI\CallbackHandlers\DlqMessagesCallbackHandler.ts" />
     <TypeScriptCompile Include="wwwroot\ts\UI\Components\Loader.ts" />
     <TypeScriptCompile Include="wwwroot\ts\UI\CallbackHandlers\BusSubscriptionCallbackHandler.ts">

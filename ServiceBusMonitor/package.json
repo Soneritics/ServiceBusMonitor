@@ -9,6 +9,7 @@
     "vinyl-fs": "^3.0.3"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.4",
     "@types/jquery": "^3.5.11"
   }
 }
