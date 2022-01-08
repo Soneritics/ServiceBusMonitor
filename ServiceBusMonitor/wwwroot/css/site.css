@@ -3067,6 +3067,10 @@ main {
     height: 270px;
 }
 
+.dashboard-messages {
+    height: 400px;
+}
+
 .dashboard-list-with-user {
     height: 270px;
 }
