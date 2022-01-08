@@ -7,10 +7,43 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\ts\Components\EventHandler.ts" />
+    <Content Remove="wwwroot\ts\ServiceBusOptions.ts" />
+    <Content Remove="wwwroot\ts\UI\Actions\ActionData.ts" />
+    <Content Remove="wwwroot\ts\UI\Actions\IAction.ts" />
+    <Content Remove="wwwroot\ts\UI\CallbackHandlers\BusQueueCallbackHandler.ts" />
+    <Content Remove="wwwroot\ts\UI\CallbackHandlers\BusSubscriptionCallbackHandler.ts" />
+    <Content Remove="wwwroot\ts\UI\CallbackHandlers\DlqMessagesCallbackHandler.ts" />
+    <Content Remove="wwwroot\ts\UI\Reloader.ts" />
+    <Content Remove="wwwroot\ts\UI\UI.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\ts\ActiveBusSubscriptionColumn.ts" />
+    <_ContentIncludedByDefault Remove="wwwroot\ts\Endpoints.ts" />
+    <_ContentIncludedByDefault Remove="wwwroot\ts\UI\CallbackHandlers\DlqMessagesCallbackHandler.ts" />
+    <_ContentIncludedByDefault Remove="wwwroot\ts\UI\Reloader.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceBusMonitor.Api\ServiceBusMonitor.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\ts\Components\EventHandler.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\Config\ServiceBusOptions.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\UI\Actions\ActionData.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\UI\Actions\IAction.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\UI\CallbackHandlers\DlqMessagesCallbackHandler.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\UI\Components\Loader.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\UI\CallbackHandlers\BusSubscriptionCallbackHandler.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="wwwroot\ts\UI\CallbackHandlers\BusQueueCallbackHandler.ts" />
+    <TypeScriptCompile Include="wwwroot\ts\UI\UI.ts" />
   </ItemGroup>
 </Project>

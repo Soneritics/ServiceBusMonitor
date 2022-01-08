@@ -6,7 +6,12 @@ const nodeRoot = "./node_modules";
 const targetPath = "./wwwroot/lib";
 
 function clean(cb) {
-    del([targetPath + "/**/*"]);
+    del([
+        targetPath + "/**/*",
+        "./wwwroot/js/ServiceBusMonitor.js",
+        "./wwwroot/js/ServiceBusMonitor.js.map"
+    ]);
+
     cb();
 }
 
@@ -17,7 +22,7 @@ function build(cb) {
 
     src(nodeRoot + "/jquery/dist/jquery.min.js").pipe(dest(targetPath + "/jquery"));
 
-    src(nodeRoot + "/file-saver/dist/FileSaver.min.js").pipe(dest(targetPath + "/file-saver"));
+    src(nodeRoot + "/file-saver/dist/*").pipe(dest(targetPath + "/file-saver"));
 
     src(nodeRoot + "/@fortawesome/fontawesome-free/js/*").pipe(dest(targetPath + "/fontawesome/js"));
     src(nodeRoot + "/@fortawesome/fontawesome-free/css/*").pipe(dest(targetPath + "/fontawesome/css"));
