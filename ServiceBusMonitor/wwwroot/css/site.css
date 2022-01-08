@@ -1870,25 +1870,10 @@ button {
     }
 }
 
-.logo {
-    width: 110px;
-    height: 35px;
-    background: url("../logos/black.svg") no-repeat;
-    background-position: center center;
-    margin: 0 auto;
-}
-
 @media (max-width: 767px) {
     .logo {
         width: 80px;
     }
-}
-
-.logo-mobile {
-    width: 20px;
-    height: 35px;
-    background: url("../logos/mobile.svg") no-repeat;
-    background-position: center center;
 }
 
 #app-container.sub-hidden .menu-button .sub,

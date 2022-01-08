@@ -3,38 +3,134 @@
     ViewData["Title"] = $"{Model?.ActiveBus} - Service Bus Monitor";
 }
 
-<p>Service bus names:</p>
-<ul>
-    @foreach (var busName in Model.ServiceBusNames)
-    {
-        <li><a asp-area="Client" asp-controller="Monitor" asp-action="Index" asp-route-bus="@busName">@busName</a></li>
-    }
-</ul>
+<nav class="navbar fixed-top">
+    <div class="d-flex align-items-center navbar-left" onclick="menu()">
+        <a href="#" class="menu-button d-none d-md-block">
+            <img src="~/img/logo-small.png" style="width: 50px;" />
+        </a>
 
-<p>
-    Last update:
-    <span
-        class="auto-update"
-        data-show-loader-icon="1"
-        data-url="@Url.Action("Update", "Updater", new { area = "Api" })"
-        data-timeout="10000"></span>
-</p>
+        <a href="#" class="menu-button-mobile d-xs-block d-sm-block d-md-none">
+            <img src="~/img/logo-small.png" style="width: 19px; margin-top: -9px;" />
+        </a>
 
-<p>Queues:</p>
-<div
-    id="bus-queues"
-    class="auto-update"
-    data-has-callback="1"
-    data-url="@Url.Action("Queues", "Bus", new { area = "Api", busName = Model.ActiveBus })"
-    data-timeout="5000"></div>
+        <h3><b>@Model?.ActiveBus</b></h3>
+    </div>
 
-<p>Topics:</p>
-<div
-    id="bus-topics"
-    class="auto-update"
-    data-has-callback="1"
-    data-url="@Url.Action("Topics", "Bus", new { area = "Api", busName = Model.ActiveBus })"
-    data-timeout="5000"></div>
+    <div class="navbar-right">
+        <div class="user d-inline-block">
+            Last update:
+            <span
+                class="auto-update"
+                data-show-loader-icon="1"
+                data-url="@Url.Action("Update", "Updater", new { area = "Api" })"
+                data-timeout="10000"></span>
+        </div>
+    </div>
+</nav>
+<div class="menu">
+    <div class="main-menu">
+        <div class="scroll">
+            <ul class="list-unstyled">
+                @foreach (var busName in Model.ServiceBusNames)
+                {
+                    <li class="@(busName.Equals(Model?.ActiveBus ?? string.Empty) ? "active" : "")">
+                        <a asp-area="Client" asp-controller="Monitor" asp-action="Index" asp-route-bus="@busName">
+                            <i class="fa fa-bus"></i> @busName
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+<main>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-5 col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fa fa-tasks"></i> Queues</h5>
+
+                        <!-- todo: <table class="table table-sm table-striped caption-top"> -->
+                        <div
+                            id="bus-queues"
+                            class="auto-update scroll dashboard-logs ps ps--active-y"
+                            data-has-callback="1"
+                            data-url="@Url.Action("Queues", "Bus", new { area = "Api", busName = Model.ActiveBus })"
+                            data-timeout="5000"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7 col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fa fa-book"></i> Topics</h5>
+                        
+                        <!-- todo: <table class="table table-sm table-striped table-hover caption-top"> -->
+                        <div
+                            id="bus-topics"
+                            class="auto-update scroll dashboard-logs ps ps--active-y"
+                            data-has-callback="1"
+                            data-url="@Url.Action("Topics", "Bus", new { area = "Api", busName = Model.ActiveBus })"
+                            data-timeout="5000"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12 mb-4" id="dlq-messages-holder">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fa fa-comment"></i> DLQ Messages</h5>
+                        
+                        <!-- todo: <table class="table table-sm table-striped table-hover caption-top"> -->
+                        <div class="table-responsive holder-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12 mb-4" id="dlq-message-ai-logs-holder">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fa fa-bar-chart"></i> Application Insights logging</h5>
+                        
+                        <!-- todo: <table class="table table-sm table-striped caption-top"> -->
+                        <div class="table-responsive holder-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="theme-colors default-transition">
+    <div class="p-3 scroll" style="overflow-y: scroll; height: 100vh;">
+        <p class="text-muted mb-2">
+            <b><i class="fa fa-laptop"></i> Debug Console</b>
+        </p>
+        <hr />
+        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
+        <p><b>[15:22:45]</b> Update a topic in queue process</p>
+        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
+        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
+        <p><b>[15:22:45]</b> Update a topic in queue process</p>
+        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
+        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
+        <p><b>[15:22:45]</b> Update a topic in queue process</p>
+        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
+        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
+        <p><b>[15:22:45]</b> Update a topic in queue process</p>
+        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
+        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
+        <p><b>[15:22:45]</b> Update a topic in queue process</p>
+        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
+    </div>
+    <a href="#" class="theme-button"> <i class="fa fa-user-secret"></i> </a>
+</div>
+
+
+<!--
     
 <div id="dlq-messages-holder">
     <p>DLQ Messages</p>
@@ -45,6 +141,7 @@
     <p>Application Insights logging</p>
     <div id="dlq-message-ai-logs"></div>
 </div>
+-->
 
 <script>
     // Loader image, when applicable
