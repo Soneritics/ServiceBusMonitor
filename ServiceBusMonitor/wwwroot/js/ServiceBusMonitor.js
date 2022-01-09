@@ -139,8 +139,6 @@ var UI = /** @class */ (function () {
      * Initialize the User Interface.
      */
     UI.prototype.init = function () {
-        // First, register the components and actions that listen to events
-        this.registerComponents();
         // First, reset the UI
         this.reset();
         // Reload the last update timestamp
@@ -172,7 +170,7 @@ var UI = /** @class */ (function () {
     UI.prototype.loadDeadletterQueueMessages = function (activeBusColumn) {
         var dlqContainer = '#' + this.options.containers.deadletterMessages;
         $(dlqContainer).show();
-        var selector = dlqContainer + " > div";
+        var selector = dlqContainer + " .holder-content";
         var data = (new DeadLetterQueuePostDataParser()).parse(this.options, activeBusColumn);
         var url = activeBusColumn.queue
             ? this.options.endpoints.dlqMessagesOnQueue
@@ -188,7 +186,7 @@ var UI = /** @class */ (function () {
     UI.prototype.showApplicationInsightsData = function (enqueuedDateTime) {
         var aiContainer = '#' + this.options.containers.applicationInsights;
         $(aiContainer).show();
-        var selector = aiContainer + " > div";
+        var selector = aiContainer + " .holder-content";
         var url = this.options.endpoints.exceptionLogs;
         var data = {
             busName: this.options.activeBus,
@@ -197,11 +195,6 @@ var UI = /** @class */ (function () {
         var loader = new Loader(selector, url, 0, true, false);
         loader.callbackHandler = new GenericTableBuilderCallbackHandler(selector, "No logs found.");
         loader.start(data);
-    };
-    /**
-     * Register the necessary components, actions, etc.
-     */
-    UI.prototype.registerComponents = function () {
     };
     return UI;
 }());
@@ -221,7 +214,7 @@ var DeleteAction = /** @class */ (function () {
         var deleteAction = $('<a href="javascript:;">Delete</a>');
         deleteAction.on('click', function () {
             $(_this).off('click');
-            //$(this).html(loaderHtml);
+            $(_this).html('<i class="fas fa-circle-notch fa-spin"></i>');
             var apiBaseUri = "";
             var data = {};
             switch (activeBusColumn.queue ? true : false) {
@@ -503,33 +496,6 @@ var Loader = /** @class */ (function () {
         if (this.showLoaderIcon) {
             $(this.selector).html(this.loaderHtml);
         }
-        /*
-        $.ajax({
-                url: this.url,
-                method: data === null ? "GET" : "POST",
-                data: data,
-                dataType: "json",
-                success: (response, status, xhr) => {
-                    if (this.showLoaderIcon) {
-                        $(this.selector).html("");
-                    }
-
-                    if (this.callbackHandler) {
-                        this.callbackHandler.handle(response);
-                    } else {
-                        $(this.selector).html(response);
-                    }
-                }
-            })
-            .fail(() => {
-                alert("error"); // todo
-            })
-            .always(() => {
-                if (this.loop) {
-                    setTimeout(() => { this.reload(data); }, this.timeout);
-                }
-            });
-        */
         $.get(this.url, data, function (response, status, xhr) {
             if (_this.showLoaderIcon) {
                 $(_this.selector).html("");

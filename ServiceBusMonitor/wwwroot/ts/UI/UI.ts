@@ -76,7 +76,7 @@
         var dlqContainer = '#' + this.options.containers.deadletterMessages;
         $(dlqContainer).show();
 
-        var selector = dlqContainer + " > div";
+        var selector = dlqContainer + " .holder-content";
         var data = (new DeadLetterQueuePostDataParser()).parse(this.options, activeBusColumn);
         var url = activeBusColumn.queue
             ? this.options.endpoints.dlqMessagesOnQueue
@@ -95,7 +95,7 @@
         var aiContainer = '#' + this.options.containers.applicationInsights;
         $(aiContainer).show();
 
-        var selector = aiContainer + " > div";
+        var selector = aiContainer + " .holder-content";
         var url = this.options.endpoints.exceptionLogs;
         var data = {
             busName: this.options.activeBus,
