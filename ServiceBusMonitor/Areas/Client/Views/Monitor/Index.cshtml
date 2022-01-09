@@ -32,7 +32,7 @@
                 {
                     <li class="@(busName.Equals(Model?.ActiveBus ?? string.Empty) ? "active" : "")">
                         <a asp-area="Client" asp-controller="Monitor" asp-action="Index" asp-route-bus="@busName">
-                            <i class="fa fa-bus"></i> @busName
+                            <i class="fa fa-bus fa-3x"></i> @busName
                         </a>
                     </li>
                 }
@@ -101,59 +101,15 @@
     </div>
 </main>
 
-<div class="theme-colors default-transition">
+<div class="debug-bar-holder default-transition">
     <div class="p-3 scroll" style="overflow-y: scroll; height: 100vh;">
         <p class="text-muted mb-2">
             <b><i class="fa fa-laptop"></i> Debug Console</b>
         </p>
         <hr />
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
-        <p><b>[15:22:32]</b> No queue found on service Bus#1</p>
-        <p><b>[15:22:45]</b> Update a topic in queue process</p>
-        <p><b>[15:22:55]</b> starting update process for topic and quotes</p>
+        <p><b>[hh:mm:ss]</b> Debug console is not implemented yet :-)</p>
     </div>
-    <span class="theme-button"> <i class="fa fa-user-secret"></i> </span>
+    <span class="debug-bar-button"><i class="fa fa-user-secret"></i></span>
 </div>
 
 @section Scripts {

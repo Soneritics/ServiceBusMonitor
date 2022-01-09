@@ -1951,6 +1951,7 @@ button {
                     color: #3a3a3a;
                     transition: color 300ms;
                     transition: background 300ms;
+                    text-align: center;
                 }
 
                     .menu .main-menu ul li a:hover, .menu .main-menu ul li a:focus {
@@ -2702,7 +2703,7 @@ button {
 
 /* 16.Main*/
 main {
-    margin-left: 410px;
+    margin-left: 150px;
     margin-top: 145px;
     margin-right: 60px;
     margin-bottom: 40px;
@@ -2719,7 +2720,7 @@ main {
 
 @media (max-width: 1439px) {
     main {
-        margin-left: 390px;
+        margin-left: 150px;
         margin-right: 50px;
         margin-top: 130px;
         margin-bottom: 30px;
@@ -2728,7 +2729,7 @@ main {
 
 @media (max-width: 1199px) {
     main {
-        margin-left: 370px;
+        margin-left: 150px;
         margin-right: 40px;
         margin-top: 110px;
         margin-bottom: 20px;
@@ -6224,7 +6225,7 @@ a.ck.ck-button {
     height: 300px;
 }
 
-.theme-colors {
+.debug-bar-holder {
     width: 280px !important;
     position: fixed;
     z-index: 1030;
@@ -6237,7 +6238,7 @@ a.ck.ck-button {
     padding-bottom: 10px;
 }
 
-    .theme-colors .theme-button {
+    .debug-bar-holder .debug-bar-button {
         position: absolute;
         left: -32px;
         background: white;
@@ -6251,7 +6252,7 @@ a.ck.ck-button {
         color: #008ecc;
     }
 
-    .theme-colors .theme-color {
+    .debug-bar-holder .theme-color {
         width: 24px;
         height: 24px;
         display: inline-block;
@@ -6259,66 +6260,66 @@ a.ck.ck-button {
         transition: background 0.25s;
     }
 
-        .theme-colors .theme-color.active, .theme-colors .theme-color:hover {
+        .debug-bar-holder .theme-color.active, .debug-bar-holder .theme-color:hover {
             background: white;
         }
 
-    .theme-colors .theme-color-purplemonster {
+    .debug-bar-holder .theme-color-purplemonster {
         border: 3px solid #922c88;
         background: #922c88;
     }
 
-    .theme-colors .theme-color-blueyale {
+    .debug-bar-holder .theme-color-blueyale {
         border: 3px solid #145388;
         background: #145388;
     }
 
-    .theme-colors .theme-color-blueolympic {
+    .debug-bar-holder .theme-color-blueolympic {
         border: 3px solid #008ecc;
         background: #008ecc;
     }
 
-    .theme-colors .theme-color-bluenavy {
+    .debug-bar-holder .theme-color-bluenavy {
         border: 3px solid #00365a;
         background: #00365a;
     }
 
-    .theme-colors .theme-color-orangecarrot {
+    .debug-bar-holder .theme-color-orangecarrot {
         border: 3px solid #ed7117;
         background: #ed7117;
     }
 
-    .theme-colors .theme-color-greenmoss {
+    .debug-bar-holder .theme-color-greenmoss {
         border: 3px solid #576a3d;
         background: #576a3d;
     }
 
-    .theme-colors .theme-color-greenlime {
+    .debug-bar-holder .theme-color-greenlime {
         border: 3px solid #6fb327;
         background: #6fb327;
     }
 
-    .theme-colors .theme-color-redruby {
+    .debug-bar-holder .theme-color-redruby {
         border: 3px solid #900604;
         background: #900604;
     }
 
-    .theme-colors .theme-color-greysteel {
+    .debug-bar-holder .theme-color-greysteel {
         border: 3px solid #48494b;
         background: #48494b;
     }
 
-    .theme-colors .theme-color-yellowgranola {
+    .debug-bar-holder .theme-color-yellowgranola {
         border: 3px solid #c0a145;
         background: #c0a145;
     }
 
-    .theme-colors.shown {
+    .debug-bar-holder.shown {
         transform: translate(0, calc(-50% + 0.5px));
         transition: transform 0.4s ease-out;
     }
 
-    .theme-colors.hidden {
+    .debug-bar-holder.hidden {
         transform: translate(280px, -50%);
         transition: transform 0.4s ease-out;
     }
@@ -7015,7 +7016,7 @@ i.large-icon {
 
     .navbar,
     .menu,
-    .theme-colors {
+    .debug-bar-holder {
         display: none;
     }
 
@@ -8803,18 +8804,18 @@ i.large-icon {
     }
 }
 
-.rtl .theme-colors {
+.rtl .debug-bar-holder {
     transform: translate(-280px, -50%);
     left: 0;
     right: initial;
 }
 
-    .rtl .theme-colors .theme-button {
+    .rtl .debug-bar-holder .debug-bar-button {
         left: 278px;
         box-shadow: 3px 0 5px rgba(0, 0, 0, 0.04);
     }
 
-    .rtl .theme-colors.shown {
+    .rtl .debug-bar-holder.shown {
         transform: translate(0, -50%);
     }
 
