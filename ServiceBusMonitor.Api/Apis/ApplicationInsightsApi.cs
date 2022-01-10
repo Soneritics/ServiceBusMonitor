@@ -27,7 +27,8 @@ public class ApplicationInsightsApi : IApplicationInsightsApi
         var query = $@"
             exceptions
             | project timestamp, type, operation_Id, cloud_RoleName, outerMessage, operation_Name, innermostMessage
-            | where timestamp between (todatetime('{start:yyyy-MM-ddTHH:mm:ss.fffZ}') .. todatetime('{end:yyyy-MM-ddTHH:mm:ss.fffZ}'))";
+            | where timestamp between (todatetime('{start:yyyy-MM-ddTHH:mm:ss.fffZ}') .. todatetime('{end:yyyy-MM-ddTHH:mm:ss.fffZ}'))
+            | order by timestamp desc";
 
         var queryResults = await _client.Query.ExecuteAsync(_appId, query);
 
