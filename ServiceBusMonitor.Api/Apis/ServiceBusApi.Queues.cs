@@ -57,7 +57,7 @@ namespace ServiceBusMonitor.Api.Apis
                     result.Add(new DlqMessage()
                     {
                         Id = message.MessageId,
-                        Enqueued = message.ScheduledEnqueueTimeUtc,
+                        Enqueued = message.SystemProperties.EnqueuedTimeUtc,
                         Content = Encoding.UTF8.GetString(message.Body).TrimStart((char)65279)
                     });
                 }
