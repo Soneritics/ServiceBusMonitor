@@ -1,4 +1,4 @@
-﻿class DeleteAction implements IAction {
+﻿class ResubmitAction implements IAction {
     private readonly eventHandler: EventHandler;
 
     constructor(eventHandler: EventHandler) {
@@ -9,7 +9,7 @@
         actionData: ActionData,
         activeBusColumn: ActiveBusColumn,
         options: ServiceBusOptions): void {
-        var deleteAction = $('<a href="javascript:;" class="btn btn-primary btn-xs px-2 mr-2" title="Delete message"><i class="fas fa-trash-alt"></i></a>');
+        var deleteAction = $('<a href="javascript:;" class="btn btn-primary btn-xs px-2 mr-2" title="Resubmit message"><i class="fas fa-redo"></i></a>');
         deleteAction.on('click', (e) => {
             $(e.currentTarget).off('click');
             $(e.currentTarget).html('<i class="fas fa-circle-notch fa-spin"></i>');
@@ -19,7 +19,7 @@
 
             switch (activeBusColumn.queue ? true : false) {
                 case true:
-                    apiBaseUri = options.endpoints.actionRemoveDlqMessageFromQueue;
+                    apiBaseUri = options.endpoints.actionResubmitDlqMessageToQueue;
                     data = {
                         busName: options.activeBus,
                         queueName: activeBusColumn.queue.queueName,
@@ -28,7 +28,7 @@
                     break;
 
                 default:
-                    apiBaseUri = options.endpoints.actionRemoveDlqMessageFromTopicSubscription;
+                    apiBaseUri = options.endpoints.actionResubmitDlqMessageToTopicSubscription;
                     data = {
                         busName: options.activeBus,
                         topicName: activeBusColumn.subscription.topicName,

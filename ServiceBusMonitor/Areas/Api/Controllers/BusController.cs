@@ -37,7 +37,7 @@ public class BusController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> RemoveDlqMessageFromQueue(QueueMessageToDelete message)
+    public async Task<IActionResult> RemoveDlqMessageFromQueue(QueueMessageModel message)
     {
         try
         {
@@ -57,13 +57,56 @@ public class BusController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> RemoveDlqMessageFromTopicSubscription(TopicMessageToDelete message)
+    public async Task<IActionResult> ResubmitDlqMessageToQueue(QueueMessageModel message)
+    {
+        try
+        {
+            await ApiCollection
+                .GetServiceBusApi(message.BusName)
+                .ResubmitDlqMessageToQueueAsync(message.QueueName, message.MessageId);
+        }
+        catch (Exception e)
+        {
+            return new JsonResult(e)
+            {
+                StatusCode = 500
+            };
+        }
+
+        return new OkResult();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RemoveDlqMessageFromTopicSubscription(TopicMessageModel message)
     {
         try
         {
             await ApiCollection
                 .GetServiceBusApi(message.BusName)
                 .RemoveDqlMessagesFromTopicSubscriptionAsync(
+                    message.TopicName,
+                    message.SubscriptionName,
+                    message.MessageId);
+        }
+        catch (Exception e)
+        {
+            return new JsonResult(e)
+            {
+                StatusCode = 500
+            };
+        }
+
+        return new OkResult();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResubmitDlqMessageToTopicSubscription(TopicMessageModel message)
+    {
+        try
+        {
+            await ApiCollection
+                .GetServiceBusApi(message.BusName)
+                .ResubmitDlqMessageToTopicAsync(
                     message.TopicName,
                     message.SubscriptionName,
                     message.MessageId);

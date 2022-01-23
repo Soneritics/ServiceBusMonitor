@@ -84,6 +84,11 @@
             this.activeBusColumn,
             this.options);
 
+        (new ResubmitAction(this.eventHandler)).process(
+            actionData,
+            this.activeBusColumn,
+            this.options);
+
         (new DeleteAction(this.eventHandler)).process(
             actionData,
             this.activeBusColumn,

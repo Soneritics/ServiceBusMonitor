@@ -48,6 +48,7 @@ var ServiceBusMonitor = /** @class */ (function () {
     };
     ServiceBusMonitor.prototype.processActions = function (actionData) {
         (new SaveAction()).process(actionData, this.activeBusColumn, this.options);
+        (new ResubmitAction(this.eventHandler)).process(actionData, this.activeBusColumn, this.options);
         (new DeleteAction(this.eventHandler)).process(actionData, this.activeBusColumn, this.options);
     };
     return ServiceBusMonitor;
@@ -211,10 +212,10 @@ var DeleteAction = /** @class */ (function () {
     }
     DeleteAction.prototype.process = function (actionData, activeBusColumn, options) {
         var _this = this;
-        var deleteAction = $('<a href="javascript:;">Delete</a>');
-        deleteAction.on('click', function () {
-            $(_this).off('click');
-            $(_this).html('<i class="fas fa-circle-notch fa-spin"></i>');
+        var deleteAction = $('<a href="javascript:;" class="btn btn-primary btn-xs px-2 mr-2" title="Delete message"><i class="fas fa-trash-alt"></i></a>');
+        deleteAction.on('click', function (e) {
+            $(e.currentTarget).off('click');
+            $(e.currentTarget).html('<i class="fas fa-circle-notch fa-spin"></i>');
             var apiBaseUri = "";
             var data = {};
             switch (activeBusColumn.queue ? true : false) {
@@ -251,11 +252,57 @@ var DeleteAction = /** @class */ (function () {
     };
     return DeleteAction;
 }());
+var ResubmitAction = /** @class */ (function () {
+    function ResubmitAction(eventHandler) {
+        this.eventHandler = eventHandler;
+    }
+    ResubmitAction.prototype.process = function (actionData, activeBusColumn, options) {
+        var _this = this;
+        var deleteAction = $('<a href="javascript:;" class="btn btn-primary btn-xs px-2 mr-2" title="Resubmit message"><i class="fas fa-redo"></i></a>');
+        deleteAction.on('click', function (e) {
+            $(e.currentTarget).off('click');
+            $(e.currentTarget).html('<i class="fas fa-circle-notch fa-spin"></i>');
+            var apiBaseUri = "";
+            var data = {};
+            switch (activeBusColumn.queue ? true : false) {
+                case true:
+                    apiBaseUri = options.endpoints.actionResubmitDlqMessageToQueue;
+                    data = {
+                        busName: options.activeBus,
+                        queueName: activeBusColumn.queue.queueName,
+                        messageId: actionData.message.id
+                    };
+                    break;
+                default:
+                    apiBaseUri = options.endpoints.actionResubmitDlqMessageToTopicSubscription;
+                    data = {
+                        busName: options.activeBus,
+                        topicName: activeBusColumn.subscription.topicName,
+                        subscriptionName: activeBusColumn.subscription.subscriptionName,
+                        messageId: actionData.message.id
+                    };
+                    break;
+            }
+            $.ajax({
+                type: "POST",
+                url: apiBaseUri,
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function () {
+                    _this.eventHandler.trigger("LoadDeadletterQueueMessages");
+                }
+            });
+            return false;
+        });
+        actionData.container.append(deleteAction);
+    };
+    return ResubmitAction;
+}());
 var SaveAction = /** @class */ (function () {
     function SaveAction() {
     }
     SaveAction.prototype.process = function (actionData, activeBusColumn, options) {
-        var downloadAction = $('<a href="javascript:;">Download</a>');
+        var downloadAction = $('<a href="javascript:;" class="btn btn-primary btn-xs px-2 mr-2" alt="Download message"><i class="fas fa-download"></i></a>');
         downloadAction.on('click', function () {
             var blob = new Blob([actionData.message.content], { type: "text/plain;charset=utf-8" });
             saveAs(blob, "msg-" + actionData.message.id + ".json");

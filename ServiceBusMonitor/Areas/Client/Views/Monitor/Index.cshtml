@@ -123,6 +123,8 @@
         endpoints.exceptionLogs = "@Url.Action("GetExceptionLogs", "ApplicationInsights", new { area = "Api" })";
         endpoints.actionRemoveDlqMessageFromQueue = "@Url.Action("RemoveDlqMessageFromQueue", "Bus", new { area = "Api" })";
         endpoints.actionRemoveDlqMessageFromTopicSubscription = "@Url.Action("RemoveDlqMessageFromTopicSubscription", "Bus", new { area = "Api" })";
+        endpoints.actionResubmitDlqMessageToQueue = "@Url.Action("ResubmitDlqMessageToQueue", "Bus", new { area = "Api" })";
+        endpoints.actionResubmitDlqMessageToTopicSubscription = "@Url.Action("ResubmitDlqMessageToTopicSubscription", "Bus", new { area = "Api" })";
 
         var sb = new ServiceBusMonitor(new ServiceBusOptions('@(Model.ActiveBus)', endpoints));
     

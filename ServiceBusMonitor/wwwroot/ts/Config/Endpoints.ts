@@ -7,4 +7,6 @@
     exceptionLogs: string;
     actionRemoveDlqMessageFromQueue: string;
     actionRemoveDlqMessageFromTopicSubscription: string;
+    actionResubmitDlqMessageToQueue: string;
+    actionResubmitDlqMessageToTopicSubscription: string;
 }

@@ -15,4 +15,7 @@ public interface IServiceBusApi
 
     Task RemoveDqlMessagesFromQueueAsync(string queueName, string messageId);
     Task RemoveDqlMessagesFromTopicSubscriptionAsync(string topicName, string subscriptionName, string messageId);
+
+    Task ResubmitDlqMessageToQueueAsync(string queueName, string messageId);
+    Task ResubmitDlqMessageToTopicAsync(string topicName, string subscriptionName, string messageId);
 }

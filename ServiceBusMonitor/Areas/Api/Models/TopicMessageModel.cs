@@ -1,8 +1,9 @@
 ﻿namespace ServiceBusMonitor.Areas.Api.Models;
 
-public class QueueMessageToDelete
+public class TopicMessageModel
 {
     public string BusName { get; set; }
-    public string QueueName { get; set; }
+    public string TopicName { get; set; }
+    public string SubscriptionName { get; set; }
     public string MessageId { get; set; }
 }

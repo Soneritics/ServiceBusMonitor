@@ -113,5 +113,46 @@ namespace ServiceBusMonitor.Api.Apis
 
             // todo: throw message not found exception
         }
+
+        public async Task ResubmitDlqMessageToTopicAsync(
+            string topicName,
+            string subscriptionName,
+            string messageId)
+        {
+            var subPath = EntityNameHelper.FormatSubscriptionPath(topicName, subscriptionName);
+            var deadLetterPath = EntityNameHelper.FormatDeadLetterPath(subPath);
+
+            var client = new MessageReceiver(
+                _configuration.ConnectionString,
+                deadLetterPath);
+
+            var publishClient = new TopicClient(
+                _configuration.ConnectionString,
+                topicName);
+
+            Message? message;
+            do
+            {
+                message = await client.ReceiveAsync();
+                if (message != default && messageId.Equals(message.MessageId))
+                {
+                    var resubmitMessage = new Message()
+                    {
+                        Body = message.Body,
+                        CorrelationId = message.CorrelationId,
+                        PartitionKey = message.PartitionKey,
+                        ScheduledEnqueueTimeUtc = DateTime.UtcNow,
+                        ContentType = message.ContentType,
+                        Label = message.Label,
+                        TimeToLive = message.TimeToLive
+                    };
+                    await publishClient.SendAsync(resubmitMessage);
+                    await client.CompleteAsync(message.SystemProperties.LockToken);
+                    message = default;
+                }
+            } while (message != default);
+
+            // todo: throw message not found or sending went wrong exception
+        }
     }
 }
